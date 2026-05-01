@@ -1,0 +1,1205 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>HeroTesbih — Marvel Karakterli Tesbih Koleksiyonu</title>
+<link href="https://fonts.googleapis.com/css2?family=Bangers&family=Crimson+Text:ital,wght@0,400;0,600;1,400&family=Share+Tech+Mono&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --black: #04040a;
+    --dark: #08080f;
+    --panel: #0d0d1a;
+    --border: rgba(255,255,255,0.07);
+    --text: rgba(255,255,255,0.85);
+    --muted: rgba(255,255,255,0.35);
+  }
+
+  *,*::before,*::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--black);
+    color: var(--text);
+    font-family: 'Crimson Text', Georgia, serif;
+    overflow-x: hidden;
+    cursor: none;
+  }
+
+  /* CUSTOM CURSOR */
+  #cursor {
+    width: 14px; height: 14px;
+    border: 2px solid #fff;
+    border-radius: 50%;
+    position: fixed; top: 0; left: 0;
+    pointer-events: none; z-index: 9999;
+    transform: translate(-50%,-50%);
+    transition: transform 0.1s, border-color 0.3s, background 0.3s;
+    mix-blend-mode: difference;
+  }
+  #cursor.hover { transform: translate(-50%,-50%) scale(2.5); background: rgba(255,255,255,0.2); }
+
+  /* NOISE TEXTURE */
+  body::before {
+    content: '';
+    position: fixed; inset: 0; z-index: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none; opacity: 0.6;
+  }
+
+  /* NAV */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 500;
+    height: 72px;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 60px;
+    background: rgba(4,4,10,0.8);
+    backdrop-filter: blur(24px);
+    border-bottom: 1px solid var(--border);
+  }
+  .nav-logo {
+    font-family: 'Bangers', cursive;
+    font-size: 32px;
+    letter-spacing: 5px;
+    background: linear-gradient(90deg, #ff4444, #ffaa00, #4488ff, #cc00ff, #ff4444);
+    background-size: 300% auto;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: shimmer 5s linear infinite;
+  }
+  .nav-links { display: flex; gap: 40px; align-items: center; }
+  .nav-links a {
+    color: var(--muted);
+    text-decoration: none;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    transition: color 0.3s;
+  }
+  .nav-links a:hover { color: #fff; }
+  .lang-switcher { display: flex; gap: 6px; }
+  .lang-btn {
+    background: transparent;
+    border: 1px solid rgba(255,255,255,0.15);
+    color: var(--muted);
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 2px;
+    cursor: none;
+    transition: all 0.25s;
+  }
+  .lang-btn.active, .lang-btn:hover {
+    border-color: rgba(255,255,255,0.5);
+    color: #fff;
+    background: rgba(255,255,255,0.08);
+  }
+
+  /* HERO */
+  #hero {
+    min-height: 100vh;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    position: relative;
+    overflow: hidden;
+    padding: 72px 60px 0;
+  }
+
+  .hero-grid-bg {
+    position: absolute; inset: 0;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
+    background-size: 60px 60px;
+    mask-image: radial-gradient(ellipse 80% 70% at 50% 50%, black 40%, transparent 100%);
+  }
+
+  .hero-orbs {
+    position: absolute; inset: 0; pointer-events: none;
+  }
+  .orb {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(80px);
+    opacity: 0.15;
+    animation: orb-float 8s ease-in-out infinite;
+  }
+
+  .hero-eyebrow {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 6px;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 24px;
+    animation: fade-up 0.8s ease both;
+  }
+
+  .hero-title {
+    font-family: 'Bangers', cursive;
+    font-size: clamp(80px, 12vw, 160px);
+    letter-spacing: 8px;
+    line-height: 0.9;
+    text-align: center;
+    background: linear-gradient(135deg, #fff 0%, rgba(255,255,255,0.6) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    position: relative;
+    animation: fade-up 0.8s ease 0.1s both;
+  }
+  .hero-title .line2 {
+    background: linear-gradient(90deg, #ff4444, #ffaa00, #4488ff, #cc00ff);
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: shimmer 4s linear infinite;
+  }
+
+  .hero-sub {
+    font-family: 'Crimson Text', serif;
+    font-style: italic;
+    font-size: 22px;
+    color: var(--muted);
+    text-align: center;
+    margin-top: 24px;
+    max-width: 600px;
+    line-height: 1.6;
+    animation: fade-up 0.8s ease 0.2s both;
+  }
+
+  .hero-cta {
+    margin-top: 48px;
+    display: flex; gap: 16px;
+    animation: fade-up 0.8s ease 0.3s both;
+  }
+  .btn-primary {
+    background: linear-gradient(135deg, #c0392b, #e74c3c);
+    color: #fff;
+    border: none;
+    padding: 16px 40px;
+    font-family: 'Bangers', cursive;
+    font-size: 18px;
+    letter-spacing: 3px;
+    border-radius: 4px;
+    cursor: none;
+    box-shadow: 0 8px 30px rgba(192,57,43,0.5);
+    transition: transform 0.2s, box-shadow 0.2s;
+    position: relative; overflow: hidden;
+  }
+  .btn-primary::after {
+    content: '';
+    position: absolute; inset: 0;
+    background: linear-gradient(135deg, rgba(255,255,255,0.2), transparent);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  .btn-primary:hover::after { opacity: 1; }
+  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 12px 40px rgba(192,57,43,0.7); }
+  .btn-ghost {
+    background: transparent;
+    border: 1px solid rgba(255,255,255,0.2);
+    color: rgba(255,255,255,0.7);
+    padding: 16px 40px;
+    font-family: 'Bangers', cursive;
+    font-size: 18px;
+    letter-spacing: 3px;
+    border-radius: 4px;
+    cursor: none;
+    transition: all 0.2s;
+  }
+  .btn-ghost:hover { border-color: rgba(255,255,255,0.5); color: #fff; }
+
+  .hero-chars {
+    display: flex; gap: 28px;
+    margin-top: 70px;
+    animation: fade-up 0.8s ease 0.4s both;
+  }
+  .hero-char-badge {
+    width: 56px; height: 56px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 26px;
+    border: 1px solid rgba(255,255,255,0.1);
+    animation: float 3s ease-in-out infinite;
+    transition: transform 0.3s, box-shadow 0.3s;
+  }
+  .hero-char-badge:hover { transform: scale(1.2) translateY(-4px) !important; }
+
+  .scroll-indicator {
+    position: absolute; bottom: 32px; left: 50%;
+    transform: translateX(-50%);
+    display: flex; flex-direction: column; align-items: center; gap: 8px;
+    color: var(--muted);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 9px; letter-spacing: 3px;
+    animation: fade-up 1s ease 1s both;
+  }
+  .scroll-line {
+    width: 1px; height: 50px;
+    background: linear-gradient(to bottom, transparent, rgba(255,255,255,0.3), transparent);
+    animation: scroll-pulse 2s ease-in-out infinite;
+  }
+
+  /* STATS BAR */
+  .stats-bar {
+    display: flex;
+    justify-content: center;
+    gap: 0;
+    padding: 0 60px;
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    background: var(--dark);
+  }
+  .stat-item {
+    flex: 1;
+    padding: 28px 40px;
+    text-align: center;
+    border-right: 1px solid var(--border);
+    max-width: 220px;
+  }
+  .stat-item:last-child { border-right: none; }
+  .stat-number {
+    font-family: 'Bangers', cursive;
+    font-size: 42px;
+    letter-spacing: 2px;
+    line-height: 1;
+  }
+  .stat-label {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 3px;
+    color: var(--muted);
+    margin-top: 6px;
+  }
+
+  /* SECTION */
+  section { position: relative; z-index: 1; }
+
+  .section-header {
+    padding: 100px 60px 60px;
+    display: flex; align-items: baseline; justify-content: space-between;
+  }
+  .section-eyebrow {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px; letter-spacing: 5px;
+    color: var(--muted); text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+  .section-title {
+    font-family: 'Bangers', cursive;
+    font-size: clamp(40px, 5vw, 72px);
+    letter-spacing: 4px;
+    line-height: 1;
+  }
+  .section-count {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px; letter-spacing: 3px;
+    color: var(--muted);
+  }
+
+  /* CHARACTER GRID */
+  .char-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2px;
+    padding: 0 60px 100px;
+  }
+
+  /* CARD */
+  .card-wrapper { perspective: 1400px; }
+
+  .card {
+    position: relative;
+    width: 100%; padding-top: 140%;
+    transform-style: preserve-3d;
+    transition: transform 0.8s cubic-bezier(0.23, 1, 0.32, 1);
+    cursor: none;
+  }
+  .card.flipped { transform: rotateY(180deg); }
+
+  .card-face {
+    position: absolute; inset: 0;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .card-back {
+    transform: rotateY(180deg);
+  }
+
+  /* FRONT FACE */
+  .card-front {
+    display: flex; flex-direction: column;
+    padding: 32px;
+    transition: box-shadow 0.4s;
+  }
+  .card-front:hover { box-shadow: 0 0 60px var(--char-glow); }
+
+  .card-top {
+    display: flex; justify-content: space-between; align-items: flex-start;
+    margin-bottom: 24px;
+  }
+  .char-name {
+    font-family: 'Bangers', cursive;
+    font-size: 42px;
+    letter-spacing: 3px;
+    line-height: 1;
+    text-shadow: 0 0 30px var(--char-glow);
+  }
+  .char-badge-num {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 2px;
+    color: var(--char-accent);
+    border: 1px solid var(--char-accent);
+    padding: 4px 10px;
+    border-radius: 2px;
+    margin-top: 6px;
+    display: inline-block;
+  }
+  .char-emoji-big {
+    font-size: 52px;
+    filter: drop-shadow(0 0 16px var(--char-glow));
+    animation: float 3s ease-in-out infinite;
+  }
+
+  .char-symbol {
+    font-size: 90px;
+    text-align: center;
+    line-height: 1;
+    color: var(--char-accent);
+    opacity: 0.12;
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+    font-family: monospace;
+  }
+
+  .char-desc {
+    font-size: 15px;
+    line-height: 1.7;
+    color: rgba(255,255,255,0.75);
+    flex: 1;
+    display: -webkit-box;
+    -webkit-line-clamp: 5;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    margin-bottom: 24px;
+    font-style: italic;
+  }
+
+  .card-footer {
+    display: flex; justify-content: space-between; align-items: center;
+    border-top: 1px solid rgba(255,255,255,0.1);
+    padding-top: 20px;
+  }
+  .char-price {
+    font-family: 'Bangers', cursive;
+    font-size: 32px;
+    letter-spacing: 1px;
+    color: var(--char-accent);
+    text-shadow: 0 0 12px var(--char-glow);
+  }
+  .char-price-label {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 9px; letter-spacing: 2px;
+    color: var(--muted);
+    margin-bottom: 4px;
+  }
+  .flip-btn {
+    background: var(--char-color);
+    border: none;
+    padding: 12px 22px;
+    color: #fff;
+    font-family: 'Bangers', cursive;
+    font-size: 14px;
+    letter-spacing: 2px;
+    border-radius: 2px;
+    cursor: none;
+    box-shadow: 0 4px 20px var(--char-glow-alpha);
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .flip-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 30px var(--char-glow-alpha); }
+
+  /* BACK FACE */
+  .card-back-inner {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column;
+    padding: 28px;
+    background: #0a0a12;
+  }
+  .back-top {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 20px;
+  }
+  .back-char-name {
+    font-family: 'Bangers', cursive;
+    font-size: 28px; letter-spacing: 3px;
+    color: var(--char-accent);
+    text-shadow: 0 0 12px var(--char-glow);
+  }
+  .back-btn {
+    background: transparent;
+    border: 1px solid rgba(255,255,255,0.15);
+    color: var(--muted);
+    padding: 6px 14px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px; letter-spacing: 2px;
+    border-radius: 2px;
+    cursor: none;
+    transition: all 0.2s;
+  }
+  .back-btn:hover { border-color: rgba(255,255,255,0.4); color: #fff; }
+
+  /* SVG TESBIH */
+  .tesbih-canvas {
+    flex: 1;
+    display: flex; align-items: center; justify-content: center;
+    position: relative;
+  }
+  .tesbih-svg { filter: drop-shadow(0 0 20px var(--char-glow)); }
+
+  .back-meta {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 12px; margin-top: 16px;
+  }
+  .meta-item {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 4px;
+    padding: 12px 14px;
+  }
+  .meta-key {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 8px; letter-spacing: 3px;
+    color: var(--muted); text-transform: uppercase;
+    margin-bottom: 5px;
+  }
+  .meta-val {
+    font-size: 14px; color: #fff;
+    font-family: 'Crimson Text', serif;
+  }
+
+  .add-cart-btn {
+    margin-top: 16px;
+    width: 100%;
+    background: linear-gradient(135deg, var(--char-color), var(--char-accent));
+    border: none;
+    padding: 16px;
+    color: #fff;
+    font-family: 'Bangers', cursive;
+    font-size: 20px;
+    letter-spacing: 4px;
+    border-radius: 2px;
+    cursor: none;
+    box-shadow: 0 6px 24px var(--char-glow-alpha);
+    transition: transform 0.2s, box-shadow 0.2s;
+    position: relative; overflow: hidden;
+  }
+  .add-cart-btn::before {
+    content: '';
+    position: absolute; top: 0; left: -100%;
+    width: 100%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
+    transition: left 0.5s;
+  }
+  .add-cart-btn:hover::before { left: 100%; }
+  .add-cart-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 36px var(--char-glow-alpha); }
+
+  /* MARQUEE */
+  .marquee-wrap {
+    overflow: hidden;
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    padding: 16px 0;
+    background: var(--dark);
+  }
+  .marquee-track {
+    display: flex; gap: 60px;
+    animation: marquee 20s linear infinite;
+    width: max-content;
+  }
+  .marquee-item {
+    font-family: 'Bangers', cursive;
+    font-size: 14px; letter-spacing: 4px;
+    color: var(--muted);
+    white-space: nowrap;
+    display: flex; align-items: center; gap: 20px;
+  }
+  .marquee-dot { width: 4px; height: 4px; border-radius: 50%; background: var(--muted); }
+
+  /* FEATURE SECTION */
+  .features {
+    padding: 100px 60px;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 2px;
+    background: var(--border);
+  }
+  .feature {
+    background: var(--dark);
+    padding: 48px 40px;
+    position: relative; overflow: hidden;
+  }
+  .feature::before {
+    content: '';
+    position: absolute; top: 0; left: 0;
+    width: 100%; height: 2px;
+    background: var(--feature-color, transparent);
+    opacity: 0;
+    transition: opacity 0.4s;
+  }
+  .feature:hover::before { opacity: 1; }
+  .feature-icon { font-size: 40px; margin-bottom: 24px; display: block; }
+  .feature-title {
+    font-family: 'Bangers', cursive;
+    font-size: 28px; letter-spacing: 2px;
+    margin-bottom: 16px;
+  }
+  .feature-desc {
+    font-size: 16px; line-height: 1.75;
+    color: var(--muted); font-style: italic;
+  }
+
+  /* FOOTER */
+  footer {
+    background: var(--dark);
+    border-top: 1px solid var(--border);
+    padding: 60px 60px 40px;
+  }
+  .footer-top {
+    display: flex; justify-content: space-between; align-items: flex-start;
+    margin-bottom: 60px;
+  }
+  .footer-brand .nav-logo { font-size: 40px; }
+  .footer-brand p {
+    color: var(--muted); font-style: italic;
+    font-size: 16px; margin-top: 12px; max-width: 280px; line-height: 1.6;
+  }
+  .footer-links { display: flex; gap: 80px; }
+  .footer-col h4 {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px; letter-spacing: 4px;
+    color: var(--muted); text-transform: uppercase;
+    margin-bottom: 20px;
+  }
+  .footer-col a {
+    display: block;
+    color: rgba(255,255,255,0.6);
+    text-decoration: none;
+    font-size: 15px;
+    margin-bottom: 12px;
+    transition: color 0.2s;
+  }
+  .footer-col a:hover { color: #fff; }
+  .footer-bottom {
+    border-top: 1px solid var(--border);
+    padding-top: 32px;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .footer-copy {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px; letter-spacing: 2px;
+    color: var(--muted);
+  }
+  .footer-chars { display: flex; gap: 12px; font-size: 22px; }
+
+  /* ANIMATIONS */
+  @keyframes shimmer {
+    0% { background-position: 0% center; }
+    100% { background-position: 300% center; }
+  }
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-8px); }
+  }
+  @keyframes orb-float {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    33% { transform: translate(30px, -20px) scale(1.1); }
+    66% { transform: translate(-20px, 20px) scale(0.95); }
+  }
+  @keyframes fade-up {
+    from { opacity: 0; transform: translateY(24px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes marquee {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+  }
+  @keyframes scroll-pulse {
+    0%, 100% { opacity: 0.3; transform: scaleY(1); }
+    50% { opacity: 1; transform: scaleY(1.2); }
+  }
+  @keyframes bead-pulse {
+    0%, 100% { r: 7; }
+    50% { r: 8.5; }
+  }
+
+  /* REVEAL ON SCROLL */
+  .reveal {
+    opacity: 0; transform: translateY(30px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+  }
+  .reveal.visible {
+    opacity: 1; transform: translateY(0);
+  }
+
+  /* TOAST */
+  #toast {
+    position: fixed; bottom: 30px; right: 30px;
+    background: #111; border: 1px solid rgba(255,255,255,0.1);
+    padding: 16px 24px; border-radius: 4px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 12px; letter-spacing: 2px;
+    color: #fff; z-index: 1000;
+    transform: translateY(20px); opacity: 0;
+    transition: all 0.4s;
+    pointer-events: none;
+  }
+  #toast.show { transform: translateY(0); opacity: 1; }
+
+  @media (max-width: 1100px) {
+    .char-grid { grid-template-columns: repeat(2, 1fr); padding: 0 32px 80px; }
+    .features { grid-template-columns: 1fr; }
+    nav { padding: 0 32px; }
+    .section-header { padding: 80px 32px 48px; }
+  }
+  @media (max-width: 700px) {
+    .char-grid { grid-template-columns: 1fr; }
+    .hero-title { font-size: 64px; }
+    nav { padding: 0 20px; }
+    .nav-links { display: none; }
+    footer { padding: 40px 24px; }
+    .footer-top { flex-direction: column; gap: 40px; }
+    .footer-links { gap: 40px; }
+    .stats-bar { flex-wrap: wrap; }
+    .stat-item { border-right: none; border-bottom: 1px solid var(--border); }
+  }
+</style>
+</head>
+<body>
+
+<div id="cursor"></div>
+<div id="toast"></div>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">HeroTesbih</div>
+  <div class="nav-links">
+    <a href="#koleksiyon" data-i18n="nav_collection">Koleksiyon</a>
+    <a href="#ozellikler" data-i18n="nav_features">Özellikler</a>
+    <a href="#hakkinda" data-i18n="nav_about">Hakkında</a>
+  </div>
+  <div class="lang-switcher">
+    <button class="lang-btn active" onclick="setLang('tr')">TR</button>
+    <button class="lang-btn" onclick="setLang('en')">EN</button>
+    <button class="lang-btn" onclick="setLang('nl')">NL</button>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="hero-grid-bg"></div>
+  <div class="hero-orbs">
+    <div class="orb" style="width:400px;height:400px;background:#c0392b;top:10%;left:5%;animation-duration:9s;"></div>
+    <div class="orb" style="width:300px;height:300px;background:#2980b9;top:20%;right:10%;animation-duration:11s;animation-delay:-3s;"></div>
+    <div class="orb" style="width:250px;height:250px;background:#27ae60;bottom:20%;left:20%;animation-duration:13s;animation-delay:-6s;"></div>
+    <div class="orb" style="width:350px;height:350px;background:#9b59b6;bottom:10%;right:5%;animation-duration:10s;animation-delay:-2s;"></div>
+  </div>
+
+  <div class="hero-eyebrow" data-i18n="hero_eyebrow">✦ Marvel Efsaneleri · El Yapımı · Sınırlı Üretim ✦</div>
+
+  <h1 class="hero-title">
+    HERO<br>
+    <span class="line2">TESBİH</span>
+  </h1>
+
+  <p class="hero-sub" data-i18n="hero_sub">Her boncukta bir güç, her çekişte bir kahraman. Marvel evreninden ilham alınan el yapımı lüks tesbih koleksiyonu.</p>
+
+  <div class="hero-cta">
+    <button class="btn-primary" onclick="document.getElementById('koleksiyon').scrollIntoView({behavior:'smooth'})" data-i18n="hero_cta1">Koleksiyonu Keşfet</button>
+    <button class="btn-ghost" data-i18n="hero_cta2">Hikayemiz</button>
+  </div>
+
+  <div class="hero-chars">
+    <div class="hero-char-badge" style="background:rgba(192,57,43,0.2);box-shadow:0 0 20px rgba(192,57,43,0.3);animation-delay:0s" title="Deadpool">⚔️</div>
+    <div class="hero-char-badge" style="background:rgba(39,174,96,0.2);box-shadow:0 0 20px rgba(39,174,96,0.3);animation-delay:0.3s" title="Hulk">💪</div>
+    <div class="hero-char-badge" style="background:rgba(192,57,43,0.2);box-shadow:0 0 20px rgba(52,152,219,0.3);animation-delay:0.6s" title="Spider-Man">🕷️</div>
+    <div class="hero-char-badge" style="background:rgba(41,128,185,0.2);box-shadow:0 0 20px rgba(243,156,18,0.3);animation-delay:0.9s" title="Thor">⚡</div>
+    <div class="hero-char-badge" style="background:rgba(192,57,43,0.2);box-shadow:0 0 20px rgba(243,156,18,0.3);animation-delay:1.2s" title="Iron Man">🔩</div>
+    <div class="hero-char-badge" style="background:rgba(26,26,46,0.5);box-shadow:0 0 20px rgba(155,89,182,0.3);animation-delay:1.5s" title="Venom">🕸️</div>
+  </div>
+
+  <div class="scroll-indicator">
+    <div class="scroll-line"></div>
+    <span data-i18n="scroll">SCROLL</span>
+  </div>
+</section>
+
+<!-- STATS -->
+<div class="stats-bar reveal">
+  <div class="stat-item">
+    <div class="stat-number" style="color:#e74c3c">6</div>
+    <div class="stat-label" data-i18n="stat1">Marvel Karakteri</div>
+  </div>
+  <div class="stat-item">
+    <div class="stat-number" style="color:#f39c12">100%</div>
+    <div class="stat-label" data-i18n="stat2">El Yapımı</div>
+  </div>
+  <div class="stat-item">
+    <div class="stat-number" style="color:#3498db">3</div>
+    <div class="stat-label" data-i18n="stat3">Dil Desteği</div>
+  </div>
+  <div class="stat-item">
+    <div class="stat-number" style="color:#2ecc71">∞</div>
+    <div class="stat-label" data-i18n="stat4">Efsane</div>
+  </div>
+</div>
+
+<!-- MARQUEE -->
+<div class="marquee-wrap">
+  <div class="marquee-track" id="marquee">
+    <!-- JS ile doldurulacak -->
+  </div>
+</div>
+
+<!-- COLLECTION -->
+<section id="koleksiyon">
+  <div class="section-header reveal">
+    <div>
+      <div class="section-eyebrow" data-i18n="section_eyebrow">✦ Özel Koleksiyon</div>
+      <h2 class="section-title" data-i18n="section_title">KARAKTERLER</h2>
+    </div>
+    <div class="section-count" data-i18n="section_count">06 / 06 ÜRÜN</div>
+  </div>
+  <div class="char-grid" id="charGrid">
+    <!-- JS ile doldurulacak -->
+  </div>
+</section>
+
+<!-- MARQUEE 2 -->
+<div class="marquee-wrap">
+  <div class="marquee-track" style="animation-direction:reverse" id="marquee2"></div>
+</div>
+
+<!-- FEATURES -->
+<section id="ozellikler" class="features">
+  <div class="feature reveal" style="--feature-color: #e74c3c">
+    <span class="feature-icon">💎</span>
+    <h3 class="feature-title" data-i18n="feat1_title">Lüks Malzeme</h3>
+    <p class="feature-desc" data-i18n="feat1_desc">Obsidyen, kuvars, oniks, mercan ve titanyum gibi doğal ve yarı değerli taşlardan el işçiliğiyle üretilen her boncuk, karakterinin ruhunu taşır.</p>
+  </div>
+  <div class="feature reveal" style="--feature-color: #f39c12; transition-delay: 0.15s">
+    <span class="feature-icon">⚡</span>
+    <h3 class="feature-title" data-i18n="feat2_title">Sınırlı Üretim</h3>
+    <p class="feature-desc" data-i18n="feat2_desc">Her karakterden yalnızca 99 adet üretilmektedir. Sertifikalı orijinallik kartı ve özel Marvel temalı hediye kutusuyla birlikte teslim edilir.</p>
+  </div>
+  <div class="feature reveal" style="--feature-color: #3498db; transition-delay: 0.3s">
+    <span class="feature-icon">🌍</span>
+    <h3 class="feature-title" data-i18n="feat3_title">Dünya Geneli Teslimat</h3>
+    <p class="feature-desc" data-i18n="feat3_desc">Türkiye, Hollanda ve tüm dünyaya güvenli ve sigortalı kargo. Sipariş takip sistemi ve özel paketleme ile kapınıza kadar.</p>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer id="hakkinda">
+  <div class="footer-top">
+    <div class="footer-brand">
+      <div class="nav-logo">HeroTesbih</div>
+      <p data-i18n="footer_brand_desc">Marvel evreninden ilham alan el yapımı lüks tesbih koleksiyonu. Her boncukta bir efsane.</p>
+    </div>
+    <div class="footer-links">
+      <div class="footer-col">
+        <h4 data-i18n="footer_col1">Koleksiyon</h4>
+        <a href="#">Deadpool</a>
+        <a href="#">Hulk</a>
+        <a href="#">Spider-Man</a>
+        <a href="#">Thor</a>
+        <a href="#">Iron Man</a>
+        <a href="#">Venom</a>
+      </div>
+      <div class="footer-col">
+        <h4 data-i18n="footer_col2">Bilgi</h4>
+        <a href="#" data-i18n="footer_about">Hakkımızda</a>
+        <a href="#" data-i18n="footer_contact">İletişim</a>
+        <a href="#" data-i18n="footer_shipping">Kargo</a>
+        <a href="#" data-i18n="footer_returns">İade</a>
+      </div>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <div class="footer-copy">© 2026 HEROTESBIH · MARVEL INSPIRED · ALL RIGHTS RESERVED</div>
+    <div class="footer-chars">⚔️💪🕷️⚡🔩🕸️</div>
+  </div>
+</footer>
+
+<script>
+// ============================================================
+// DATA
+// ============================================================
+const i18n = {
+  tr: {
+    nav_collection: "Koleksiyon", nav_features: "Özellikler", nav_about: "Hakkında",
+    hero_eyebrow: "✦ Marvel Efsaneleri · El Yapımı · Sınırlı Üretim ✦",
+    hero_sub: "Her boncukta bir güç, her çekişte bir kahraman. Marvel evreninden ilham alınan el yapımı lüks tesbih koleksiyonu.",
+    hero_cta1: "Koleksiyonu Keşfet", hero_cta2: "Hikayemiz",
+    scroll: "SCROLL",
+    stat1: "Marvel Karakteri", stat2: "El Yapımı", stat3: "Dil Desteği", stat4: "Efsane",
+    section_eyebrow: "✦ Özel Koleksiyon", section_title: "KARAKTERLER", section_count: "06 / 06 ÜRÜN",
+    feat1_title: "Lüks Malzeme", feat1_desc: "Obsidyen, kuvars, oniks, mercan ve titanyum gibi doğal ve yarı değerli taşlardan el işçiliğiyle üretilen her boncuk, karakterinin ruhunu taşır.",
+    feat2_title: "Sınırlı Üretim", feat2_desc: "Her karakterden yalnızca 99 adet üretilmektedir. Sertifikalı orijinallik kartı ve özel Marvel temalı hediye kutusuyla birlikte teslim edilir.",
+    feat3_title: "Dünya Geneli Teslimat", feat3_desc: "Türkiye, Hollanda ve tüm dünyaya güvenli ve sigortalı kargo. Sipariş takip sistemi ve özel paketleme ile kapınıza kadar.",
+    footer_brand_desc: "Marvel evreninden ilham alan el yapımı lüks tesbih koleksiyonu. Her boncukta bir efsane.",
+    footer_col1: "Koleksiyon", footer_col2: "Bilgi",
+    footer_about: "Hakkımızda", footer_contact: "İletişim", footer_shipping: "Kargo", footer_returns: "İade",
+    flip: "Ürünü Gör", back: "← Geri", addCart: "Sepete Ekle", price: "FİYAT", beads: "BONCUK", material: "MALZEME", limited: "Sınırlı Üretim",
+    toast: "✓ Sepete Eklendi!",
+  },
+  en: {
+    nav_collection: "Collection", nav_features: "Features", nav_about: "About",
+    hero_eyebrow: "✦ Marvel Legends · Handcrafted · Limited Edition ✦",
+    hero_sub: "A power in every bead, a hero in every pull. Luxury handcrafted rosary collection inspired by the Marvel universe.",
+    hero_cta1: "Explore Collection", hero_cta2: "Our Story",
+    scroll: "SCROLL",
+    stat1: "Marvel Characters", stat2: "Handcrafted", stat3: "Languages", stat4: "Legendary",
+    section_eyebrow: "✦ Exclusive Collection", section_title: "CHARACTERS", section_count: "06 / 06 PRODUCTS",
+    feat1_title: "Luxury Materials", feat1_desc: "Every bead — crafted from natural and semi-precious stones like obsidian, quartz, onyx, coral, and titanium — carries the spirit of its character.",
+    feat2_title: "Limited Edition", feat2_desc: "Only 99 pieces per character. Delivered with a certified authenticity card and exclusive Marvel-themed gift box.",
+    feat3_title: "Worldwide Shipping", feat3_desc: "Secure, insured shipping to Turkey, Netherlands, and worldwide. Order tracking and premium packaging, delivered to your door.",
+    footer_brand_desc: "Luxury handcrafted rosary collection inspired by the Marvel universe. A legend in every bead.",
+    footer_col1: "Collection", footer_col2: "Info",
+    footer_about: "About Us", footer_contact: "Contact", footer_shipping: "Shipping", footer_returns: "Returns",
+    flip: "See Product", back: "← Back", addCart: "Add to Cart", price: "PRICE", beads: "BEADS", material: "MATERIAL", limited: "Limited Edition",
+    toast: "✓ Added to Cart!",
+  },
+  nl: {
+    nav_collection: "Collectie", nav_features: "Kenmerken", nav_about: "Over ons",
+    hero_eyebrow: "✦ Marvel Legendes · Handgemaakt · Beperkte Oplage ✦",
+    hero_sub: "Kracht in elke kraal, een held bij elke trek. Luxe handgemaakte rozenkrans collectie geïnspireerd op het Marvel universum.",
+    hero_cta1: "Ontdek Collectie", hero_cta2: "Ons Verhaal",
+    scroll: "SCROLL",
+    stat1: "Marvel Karakters", stat2: "Handgemaakt", stat3: "Talen", stat4: "Legendarisch",
+    section_eyebrow: "✦ Exclusieve Collectie", section_title: "KARAKTERS", section_count: "06 / 06 PRODUCTEN",
+    feat1_title: "Luxe Materialen", feat1_desc: "Elke kraal — gemaakt van natuurlijke en halfedelstenen zoals obsidiaan, kwarts, onyx, koraal en titanium — draagt de geest van zijn karakter.",
+    feat2_title: "Beperkte Oplage", feat2_desc: "Slechts 99 stuks per karakter. Geleverd met een gecertificeerde echtheidskaart en exclusieve Marvel-thema geschenkdoos.",
+    feat3_title: "Wereldwijde Verzending", feat3_desc: "Veilige, verzekerde verzending naar Turkije, Nederland en wereldwijd. Ordertracking en premium verpakking, direct aan uw deur.",
+    footer_brand_desc: "Luxe handgemaakte rozenkrans collectie geïnspireerd op het Marvel universum. Een legende in elke kraal.",
+    footer_col1: "Collectie", footer_col2: "Info",
+    footer_about: "Over Ons", footer_contact: "Contact", footer_shipping: "Verzending", footer_returns: "Retour",
+    flip: "Zie Product", back: "← Terug", addCart: "Voeg Toe", price: "PRIJS", beads: "KRALEN", material: "MATERIAAL", limited: "Beperkte Oplage",
+    toast: "✓ Toegevoegd!",
+  },
+};
+
+const characters = [
+  {
+    id: "deadpool",
+    name: "Deadpool",
+    color: "#c0392b", accent: "#e74c3c", glow: "#ff6b6b",
+    emoji: "⚔️", symbol: "✗",
+    desc: {
+      tr: "Ölümsüzlerin tesbihi! Deadpool'un kırmızı-siyah renk paletinden ilham alınan bu özel seri, her çekişte «Chimichanga!» diye bağırmanızı sağlar. 33 adet el işi kırmızı obsidyen boncukla üretilen bu tesbih; kötüleri yenip iyi bir gün geçirmek isteyenler için biçilmiş kaftan. Uyarı: Bu tesbihi tutarken kendinizi biraz çılgın hissedebilirsiniz.",
+      en: "The rosary of immortals! Inspired by Deadpool's iconic red-black palette, this series makes you shout 'Chimichanga!' with every pull. 33 hand-polished red obsidian beads. Warning: You may feel slightly insane while holding this. That's normal.",
+      nl: "De rozenkrans der onsterfelijken! Geïnspireerd door Deadpool's iconische rood-zwart palet. 33 met de hand gepolijste rode obsidiaan kralen. Waarschuwing: Je kunt je iets gek voelen. Dat is normaal.",
+    },
+    price: "₺1.890", beads: 33,
+    material: { tr: "Kırmızı Obsidyen", en: "Red Obsidian", nl: "Rode Obsidiaan" },
+    beadColor: "#cc0000", stringColor: "#1a0000", accentColor: "#ff4444",
+    bgGrad: "linear-gradient(150deg, #2d0000 0%, #0a0a0a 60%)",
+  },
+  {
+    id: "hulk",
+    name: "Hulk",
+    color: "#27ae60", accent: "#2ecc71", glow: "#00ff88",
+    emoji: "💪", symbol: "☢",
+    desc: {
+      tr: "HULK TESBIH ÇEKER! Gama radyasyonuyla şekillendirilmiş yeşil kuvars boncuklardan oluşan bu devasa tesbih, ellerinizde güç hissi yaratır. 99 boncuk, 99 kez öfkenizi kontrol etme şansı. Stresinizi dağıtmak ve «HULK SMASH!» diye bağırmaktan kaçınmak için mükemmel.",
+      en: "HULK PULLS BEADS! Made from gamma-charged green quartz beads. 99 beads — 99 chances to control your rage. Perfect for dispersing stress and avoiding the urge to scream 'HULK SMASH!'",
+      nl: "HULK TREKT KRALEN! Gemaakt van gammageladen groene kwarzkralen. 99 kralen — 99 kansen om je woede te beheersen. Perfect om 'HULK SMASH!' te vermijden.",
+    },
+    price: "₺2.450", beads: 99,
+    material: { tr: "Yeşil Kuvars", en: "Green Quartz", nl: "Groene Kwarts" },
+    beadColor: "#00aa33", stringColor: "#003300", accentColor: "#00ff66",
+    bgGrad: "linear-gradient(150deg, #001a00 0%, #0a0a0a 60%)",
+  },
+  {
+    id: "spiderman",
+    name: "Spider-Man",
+    color: "#c0392b", accent: "#3498db", glow: "#4fc3f7",
+    emoji: "🕷️", symbol: "⬡",
+    desc: {
+      tr: "Büyük güç, büyük sorumluluk... ve harika bir tesbih! Kırmızı ve mavi renklerin büyüleyici dansıyla göz kamaştırır. Her boncuğun yüzeyine işlenmiş örümcek ağı motifi, sizi Manhattan çatılarında hissettiriyor. New York'u kurtaramasanız da gününüzü kurtarabilirsiniz.",
+      en: "Great power, great responsibility... and a fantastic rosary! Spider-web motifs on every bead make you feel like you're on Manhattan rooftops. You may not save New York, but you can save your day.",
+      nl: "Grote kracht, grote verantwoordelijkheid... en een fantastische rozenkrans! Spinnenweb motieven op elke kraal. Je redt misschien niet New York, maar zeker je dag.",
+    },
+    price: "₺1.650", beads: 33,
+    material: { tr: "Kırmızı Akik & Mavi Lapis", en: "Red Agate & Blue Lapis", nl: "Rode Agaat & Blauwe Lapis" },
+    beadColor: "#cc0000", stringColor: "#001133", accentColor: "#4488ff",
+    bgGrad: "linear-gradient(150deg, #1a0000 0%, #000a1a 60%)",
+  },
+  {
+    id: "thor",
+    name: "Thor",
+    color: "#2980b9", accent: "#f39c12", glow: "#ffd700",
+    emoji: "⚡", symbol: "⚡",
+    desc: {
+      tr: "Asgard'dan Dünya'ya, şimdi ellerinizde! Mjolnir'in metalinden ilham alınan titanyum kaplama boncuklar ve altın yaldızlı zinciriyle bu tesbih, Tanrıların Tanrısı'nın gücünü taşır. Yalnızca layık olanlar tutabilir. Peki siz layık mısınız?",
+      en: "From Asgard to Earth, now in your hands! Titanium-coated beads inspired by Mjolnir. Only the worthy may hold this rosary. Are you worthy?",
+      nl: "Van Asgard naar Aarde! Titanium beklede kralen geïnspireerd op Mjolnir. Alleen de waardigen mogen dit vasthouden. Ben jij waardig?",
+    },
+    price: "₺3.200", beads: 99,
+    material: { tr: "Titanyum & Altın Kaplama", en: "Titanium & Gold Plated", nl: "Titanium & Verguld" },
+    beadColor: "#7788bb", stringColor: "#111133", accentColor: "#ffcc00",
+    bgGrad: "linear-gradient(150deg, #000033 0%, #0a0a0a 60%)",
+  },
+  {
+    id: "ironman",
+    name: "Iron Man",
+    color: "#c0392b", accent: "#f39c12", glow: "#ffaa00",
+    emoji: "🔩", symbol: "♦",
+    desc: {
+      tr: "Arc Reactor'ın enerjisiyle üretildi! Altın ve kırmızı renklerde işlenmiş bu lüks tesbih, Tony Stark'ın «Suit up!» dediği anki özgüveni sizde de uyandırır. Zeki, karizmatik, yakışıklı — tesbih de öyle. JARVIS bile onayladı.",
+      en: "Powered by Arc Reactor energy! This luxury gold-and-red rosary awakens the confidence of Tony Stark's 'Suit up!' moment. Intelligent, charismatic, handsome — so is the rosary. Even JARVIS approved.",
+      nl: "Aangedreven door Arc Reactor energie! Deze luxe goud-rode rozenkrans wekt het zelfvertrouwen van Tony Starks 'Suit up!' moment. Zelfs JARVIS keurde het goed.",
+    },
+    price: "₺4.100", beads: 33,
+    material: { tr: "Kırmızı Mercan & Altın Aksesuar", en: "Red Coral & Gold Accessories", nl: "Rode Koraal & Goud" },
+    beadColor: "#cc2200", stringColor: "#1a0a00", accentColor: "#ffaa00",
+    bgGrad: "linear-gradient(150deg, #1a0000 0%, #0a0800 60%)",
+  },
+  {
+    id: "venom",
+    name: "Venom",
+    color: "#1a1a2e", accent: "#9b59b6", glow: "#cc00ff",
+    emoji: "🕸️", symbol: "◈",
+    desc: {
+      tr: "Biz tesbih çekeriz. Biz sempati duymayız. Biz güçlüyüz. Venom'un koyu karizmasından doğan bu jet siyah oniks tesbih, ellerinizde hissettireceği ağırlık ve soğuklukla sizi farklı bir boyuta taşır. Karanlığın içindeki düzen. İçinizdeki Venom.",
+      en: "We pull beads. We feel no sympathy. We are powerful. This jet-black onyx rosary transports you to another dimension. Order within darkness. The Venom within you.",
+      nl: "Wij trekken kralen. Wij voelen geen sympathie. Wij zijn krachtig. Deze gitzwarte onyx rozenkrans transporteert je. Orde in duisternis. De Venom in jou.",
+    },
+    price: "₺2.750", beads: 99,
+    material: { tr: "Siyah Oniks", en: "Black Onyx", nl: "Zwarte Onyx" },
+    beadColor: "#111111", stringColor: "#050505", accentColor: "#aa00ff",
+    bgGrad: "linear-gradient(150deg, #050508 0%, #0d0010 60%)",
+  },
+];
+
+// ============================================================
+// STATE
+// ============================================================
+let currentLang = 'tr';
+let flippedCards = {};
+
+// ============================================================
+// CURSOR
+// ============================================================
+const cursor = document.getElementById('cursor');
+document.addEventListener('mousemove', e => {
+  cursor.style.left = e.clientX + 'px';
+  cursor.style.top = e.clientY + 'px';
+});
+document.addEventListener('mouseover', e => {
+  if (e.target.matches('button, a, .card-wrapper, .hero-char-badge')) {
+    cursor.classList.add('hover');
+  } else {
+    cursor.classList.remove('hover');
+  }
+});
+
+// ============================================================
+// MARQUEE
+// ============================================================
+function buildMarquee() {
+  const items = characters.map(c => `<div class="marquee-item">${c.emoji} ${c.name} <span class="marquee-dot"></span></div>`).join('');
+  ['marquee','marquee2'].forEach(id => {
+    document.getElementById(id).innerHTML = items + items + items + items;
+  });
+}
+
+// ============================================================
+// SVG TESBIH
+// ============================================================
+function buildTesbihSVG(char) {
+  const n = Math.min(char.beads, 33);
+  const R = 90, cx = 130, cy = 130;
+  let beadPaths = '', lines = '';
+  const pts = [];
+
+  for (let i = 0; i < n; i++) {
+    const a = (i / n) * Math.PI * 2 - Math.PI / 2;
+    pts.push({ x: cx + R * Math.cos(a), y: cy + R * Math.sin(a) });
+  }
+
+  for (let i = 0; i < n; i++) {
+    const next = pts[(i + 1) % n];
+    lines += `<line x1="${pts[i].x.toFixed(1)}" y1="${pts[i].y.toFixed(1)}" x2="${next.x.toFixed(1)}" y2="${next.y.toFixed(1)}" stroke="${char.stringColor}" stroke-width="2" opacity="0.8"/>`;
+  }
+
+  pts.forEach((p, i) => {
+    const isSpecial = i === 0;
+    const r = isSpecial ? 11 : 8;
+    beadPaths += `
+      <circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="${r}" fill="${char.beadColor}" style="filter:drop-shadow(0 0 5px ${char.accentColor}88)"/>
+      <circle cx="${(p.x - r*0.3).toFixed(1)}" cy="${(p.y - r*0.3).toFixed(1)}" r="${(r*0.3).toFixed(1)}" fill="white" opacity="0.2"/>
+    `;
+  });
+
+  return `
+    <svg class="tesbih-svg" width="260" height="260" viewBox="0 0 260 260">
+      <defs>
+        <filter id="glow-${char.id}">
+          <feGaussianBlur stdDeviation="3" result="blur"/>
+          <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+      </defs>
+      ${lines}
+      ${beadPaths}
+      <!-- Center bead -->
+      <circle cx="${cx}" cy="${cy}" r="16" fill="${char.beadColor}" style="filter:drop-shadow(0 0 12px ${char.accentColor})"/>
+      <circle cx="${cx-4}" cy="${cy-4}" r="6" fill="white" opacity="0.25"/>
+      <!-- Tail -->
+      <line x1="${cx}" y1="${cy+16}" x2="${cx}" y2="${cy+36}" stroke="${char.stringColor}" stroke-width="3"/>
+      <circle cx="${cx}" cy="${cy+44}" r="8" fill="${char.accentColor}" style="filter:drop-shadow(0 0 8px ${char.accentColor})"/>
+      <circle cx="${cx-2}" cy="${cy+42}" r="3" fill="white" opacity="0.3"/>
+    </svg>
+  `;
+}
+
+// ============================================================
+// RENDER CARDS
+// ============================================================
+function renderCards() {
+  const t = i18n[currentLang];
+  const grid = document.getElementById('charGrid');
+  grid.innerHTML = characters.map(char => `
+    <div class="card-wrapper reveal" style="transition-delay: ${characters.indexOf(char) * 0.08}s">
+      <div class="card ${flippedCards[char.id] ? 'flipped' : ''}" id="card-${char.id}"
+        style="
+          --char-color: ${char.color};
+          --char-accent: ${char.accent};
+          --char-glow: ${char.glow};
+          --char-glow-alpha: ${char.glow}66;
+        "
+        onclick="toggleCard('${char.id}')">
+
+        <!-- FRONT -->
+        <div class="card-face card-front" style="background: ${char.bgGrad}; border: 1px solid ${char.accent}22;">
+          <div class="char-symbol">${char.symbol}</div>
+          <div class="card-top">
+            <div>
+              <div class="char-name" style="color: ${char.accent};">${char.name}</div>
+              <div class="char-badge-num">${t.limited}</div>
+            </div>
+            <div class="char-emoji-big" style="animation-delay: ${Math.random()*2}s">${char.emoji}</div>
+          </div>
+          <p class="char-desc">${char.desc[currentLang]}</p>
+          <div class="card-footer">
+            <div>
+              <div class="char-price-label">${t.price}</div>
+              <div class="char-price">${char.price}</div>
+            </div>
+            <button class="flip-btn" style="background: ${char.color}; box-shadow: 0 4px 20px ${char.glow}44;">${t.flip} →</button>
+          </div>
+        </div>
+
+        <!-- BACK -->
+        <div class="card-face card-back">
+          <div class="card-back-inner" style="border: 1px solid ${char.accent}44;">
+            <div class="back-top">
+              <div class="back-char-name" style="color: ${char.accent}; --char-glow: ${char.glow};">${char.name}</div>
+              <button class="back-btn">${t.back}</button>
+            </div>
+            <div class="tesbih-canvas">
+              <div style="text-align:center; color: ${char.accentColor || char.accent}; font-family: 'Share Tech Mono', monospace; font-size: 9px; letter-spacing: 2px; margin-bottom: 8px; opacity: 0.6;">${char.beads} ${t.beads}</div>
+              ${buildTesbihSVG(char)}
+            </div>
+            <div class="back-meta">
+              <div class="meta-item">
+                <div class="meta-key">${t.beads}</div>
+                <div class="meta-val">${char.beads}</div>
+              </div>
+              <div class="meta-item">
+                <div class="meta-key">${t.material}</div>
+                <div class="meta-val">${char.material[currentLang]}</div>
+              </div>
+            </div>
+            <button class="add-cart-btn" style="background: linear-gradient(135deg, ${char.color}, ${char.accent}); box-shadow: 0 6px 24px ${char.glow}44;"
+              onclick="event.stopPropagation(); addToCart('${char.name}')">
+              ${t.addCart} · ${char.price}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  `).join('');
+
+  // re-observe new elements
+  observeReveal();
+}
+
+// ============================================================
+// INTERACTIONS
+// ============================================================
+function toggleCard(id) {
+  flippedCards[id] = !flippedCards[id];
+  const card = document.getElementById('card-' + id);
+  if (card) card.classList.toggle('flipped', flippedCards[id]);
+}
+
+function addToCart(name) {
+  const t = i18n[currentLang];
+  const toast = document.getElementById('toast');
+  toast.textContent = t.toast + ' ' + name;
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 2500);
+}
+
+// ============================================================
+// LANGUAGE
+// ============================================================
+function setLang(lang) {
+  currentLang = lang;
+  document.querySelectorAll('.lang-btn').forEach(btn => btn.classList.remove('active'));
+  document.querySelector(`.lang-btn[onclick="setLang('${lang}')"]`).classList.add('active');
+
+  // Update static i18n elements
+  const t = i18n[lang];
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.getAttribute('data-i18n');
+    if (t[key]) el.textContent = t[key];
+  });
+
+  // Re-render cards
+  renderCards();
+}
+
+// ============================================================
+// SCROLL REVEAL
+// ============================================================
+function observeReveal() {
+  const els = document.querySelectorAll('.reveal:not(.visible)');
+  const obs = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.classList.add('visible');
+        obs.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.1 });
+  els.forEach(el => obs.observe(el));
+}
+
+// ============================================================
+// INIT
+// ============================================================
+buildMarquee();
+renderCards();
+observeReveal();
+</script>
+</body>
+</html>
